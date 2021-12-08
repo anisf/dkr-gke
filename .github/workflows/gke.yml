@@ -37,17 +37,18 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v2
         with:
-          push: true
-          context: .
-          file: ./Dockerfile
-          tags: anisfathallah/gke:${{ matrix.kubectl_version }-${{ matrix.img_purpose }}}
+          push: false
+          context: ${{ matrix.img_purpose }}
+          file: ./${{ matrix.img_purpose }}/Dockerfile
+          tags: anisfathallah/py-ubuntu:${{ matrix.img_purpose }}
+          load: true
           build-args: |
             KUBECTL_VERSION=${{ matrix.kubectl_version }}
 
       - name: Test builded image
         uses: addnab/docker-run-action@v1
         with:
-          image: anisfathallah/gke:${{ matrix.kubectl_version }-${{ matrix.img_purpose }}}
+          image: anisfathallah/gke:${{ matrix.kubectl_version }}-${{ matrix.img_purpose }}}
           options: -v ${{ github.workspace }}:/workspace
           run: |
             id
@@ -56,6 +57,18 @@ jobs:
             gcloud version
             helm version
             kubectl version
+
+      - name: Push GKE image
+        id: docker_push
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          context: ${{ matrix.img_purpose }}
+          file: ./${{ matrix.img_purpose }}/Dockerfile
+          tags: anisfathallah/py-ubuntu:${{ matrix.img_purpose }}
+          load: true
+          build-args: |
+            KUBECTL_VERSION=${{ matrix.kubectl_version }}
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
