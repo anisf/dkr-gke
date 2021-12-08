@@ -55,7 +55,7 @@ jobs:
             echo $PATH
             gcloud version
             helm version
-            kubectl version
+            kubectl version --client
 
       - name: Push GKE image
         id: docker_push
