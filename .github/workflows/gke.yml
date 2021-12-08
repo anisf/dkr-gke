@@ -40,7 +40,7 @@ jobs:
           push: false
           context: ${{ matrix.img_purpose }}
           file: ./${{ matrix.img_purpose }}/Dockerfile
-          tags: anisfathallah/py-ubuntu:${{ matrix.img_purpose }}
+          tags: anisfathallah/gke:${{ matrix.kubectl_version }}-${{ matrix.img_purpose }}}
           load: true
           build-args: |
             KUBECTL_VERSION=${{ matrix.kubectl_version }}
@@ -65,7 +65,7 @@ jobs:
           push: true
           context: ${{ matrix.img_purpose }}
           file: ./${{ matrix.img_purpose }}/Dockerfile
-          tags: anisfathallah/py-ubuntu:${{ matrix.img_purpose }}
+          tags: anisfathallah/gke:${{ matrix.kubectl_version }}-${{ matrix.img_purpose }}}
           load: true
           build-args: |
             KUBECTL_VERSION=${{ matrix.kubectl_version }}
