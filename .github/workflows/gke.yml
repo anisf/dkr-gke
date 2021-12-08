@@ -58,7 +58,7 @@ jobs:
             kubectl version
 
       - name: Push GKE image
-        id: docker_build
+        id: docker_push
         uses: docker/build-push-action@v2
         with:
           push: true
