@@ -14,9 +14,6 @@ jobs:
         - v1.20.0
         - v1.21.0
         - v1.22.0
-        img_purpose:
-        - stable
-        - base
     steps:
       - name: Git checkout
         uses: actions/checkout@v2
@@ -33,21 +30,22 @@ jobs:
           username: ${{ secrets.DOCKERHUB_ACCESS_USERNAME }}
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
 
-      - name: Build GKE image
+      - name: Build GKE base image
         id: docker_build
         uses: docker/build-push-action@v2
         with:
           load: true
-          context: ${{ matrix.img_purpose }}
-          file: ./${{ matrix.img_purpose }}/Dockerfile
-          tags: 'anisfathallah/gke:${{ matrix.kubectl_version }}-${{ matrix.img_purpose }}'
+          context: .
+          file: ./Dockerfile
+          tags: 'anisfathallah/gke:${{ matrix.kubectl_version }}-base'
+          target: base
           build-args: |
             KUBECTL_VERSION=${{ matrix.kubectl_version }}
 
-      - name: Test builded image
+      - name: Test GKE base image
         uses: addnab/docker-run-action@v1
         with:
-          image: 'anisfathallah/gke:${{ matrix.kubectl_version }}-${{ matrix.img_purpose }}'
+          image: 'anisfathallah/gke:${{ matrix.kubectl_version }}-base'
           options: -v ${{ github.workspace }}:/workspace
           run: |
             id
@@ -57,21 +55,59 @@ jobs:
             helm version
             kubectl version --client
 
-      - name: Push GKE image
+      - name: Push GKE base image
         id: docker_push
         uses: docker/build-push-action@v2
         with:
           push: true
-          context: ${{ matrix.img_purpose }}
-          file: ./${{ matrix.img_purpose }}/Dockerfile
-          tags: 'anisfathallah/gke:${{ matrix.kubectl_version }}-${{ matrix.img_purpose }}'
+          context: .
+          file: ./Dockerfile
+          tags: 'anisfathallah/gke:${{ matrix.kubectl_version }}-base'
+          target: base
+          build-args: |
+            KUBECTL_VERSION=${{ matrix.kubectl_version }}
+
+      - name: Build GKE stable image
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          context: .
+          file: ./Dockerfile
+          tags: 'anisfathallah/gke:${{ matrix.kubectl_version }}-stable'
+          target: stable
+          build-args: |
+            KUBECTL_VERSION=${{ matrix.kubectl_version }}
+
+      - name: Test GKE stable image
+        uses: addnab/docker-run-action@v1
+        with:
+          image: 'anisfathallah/gke:${{ matrix.kubectl_version }}-stable'
+          options: -v ${{ github.workspace }}:/workspace
+          run: |
+            id
+            cd /workspace
+            echo $PATH
+            gcloud version
+            helm version
+            kubectl version --client
+
+      - name: Push GKE stable image
+        id: docker_push
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          context: .
+          file: ./Dockerfile
+          tags: 'anisfathallah/gke:${{ matrix.kubectl_version }}-stable'
+          target: stable
           build-args: |
             KUBECTL_VERSION=${{ matrix.kubectl_version }}
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'anisfathallah/gke:${{ matrix.kubectl_version }}-${{ matrix.img_purpose }}'
+          image-ref: 'anisfathallah/gke:${{ matrix.kubectl_version }}-stable'
           format: 'template'
           template: '@/contrib/sarif.tpl'
           output: 'trivy-results.sarif'
