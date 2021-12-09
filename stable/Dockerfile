@@ -12,6 +12,7 @@ RUN apk add --update ca-certificates bash \
     && curl -LO https://get.helm.sh/helm-$HELM_VERSION-linux-amd64.tar.gz \
     && tar -zxvf helm-$HELM_VERSION-linux-amd64.tar.gz \
     && mv linux-amd64/helm /usr/local/bin/helm  \
+    && helm plugin install https://github.com/hayorov/helm-gcs.git \
     && apk del --purge .build-deps  \
     && rm -rf /var/cache/apk/* /tmp/* /root/.cache .build-deps linux-amd64 *.tar.gz \
     && adduser -S guser
