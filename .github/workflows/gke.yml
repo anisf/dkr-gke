@@ -31,7 +31,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
 
       - name: Build GKE base image
-        id: docker_build
+        id: docker_build_base
         uses: docker/build-push-action@v2
         with:
           load: true
@@ -56,7 +56,7 @@ jobs:
             kubectl version --client
 
       - name: Push GKE base image
-        id: docker_push
+        id: docker_push_base
         uses: docker/build-push-action@v2
         with:
           push: true
@@ -68,7 +68,7 @@ jobs:
             KUBECTL_VERSION=${{ matrix.kubectl_version }}
 
       - name: Build GKE stable image
-        id: docker_build
+        id: docker_build_stable
         uses: docker/build-push-action@v2
         with:
           load: true
@@ -93,7 +93,7 @@ jobs:
             kubectl version --client
 
       - name: Push GKE stable image
-        id: docker_push
+        id: docker_push_stable
         uses: docker/build-push-action@v2
         with:
           push: true
